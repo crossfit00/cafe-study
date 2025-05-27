@@ -17,6 +17,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwiZXhwIjoxNzQ4MzMyNzI3f
 }
 
 ### 주문 취소
-DELETE http://localhost:8080/order/1
+DELETE http://localhost:8080/order/1/cancel
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwiZXhwIjoxNzQ4MzMxOTE3fQ.GNoj_iweAl0qKHcf0FMIvTvVVZa-XgvoOAcNbg2T5Uw
