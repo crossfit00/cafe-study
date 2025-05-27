@@ -22,7 +22,7 @@
   - [주문 생성](https://github.com/crossfit00/cafe-study/blob/master/docs/%EC%A3%BC%EB%AC%B8%20%EC%83%9D%EC%84%B1.md)
   - [주문 취소](https://github.com/crossfit00/cafe-study/blob/master/docs/%EC%A3%BC%EB%AC%B8%20%EC%B7%A8%EC%86%8C.md)
 - Payment
-  - [결제 생성]()
+  - [결제 생성](https://github.com/crossfit00/cafe-study/blob/master/docs/%EA%B2%B0%EC%A0%9C%20%EC%83%9D%EC%84%B1.md)
 
 <br>
 
