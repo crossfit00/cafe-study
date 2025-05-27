@@ -15,17 +15,16 @@
 
 ## `API 명세서`
 
-- [회원 가입](https://github.com/crossfit00/cafe-study/blob/master/docs/%ED%9A%8C%EC%9B%90%EA%B0%80%EC%9E%85.md)
-- [회원 탈퇴]()
+- Member
+  - [회원 가입](https://github.com/crossfit00/cafe-study/blob/master/docs/%ED%9A%8C%EC%9B%90%EA%B0%80%EC%9E%85.md)
+  - [회원 탈퇴](https://github.com/crossfit00/cafe-study/blob/master/docs/%ED%9A%8C%EC%9B%90%ED%83%88%ED%87%B4.md)
+- Order
+  - [주문 생성]()
+  - [주문 취소]()
+- Payment
+  - [결제 생성]()
 
-```http request
-### 멤버 탈퇴
-DELETE http://localhost:8080/member/2/withdraw
-Content-Type: application/json
-Authorization: Bearer eyJhbGci
-```
-```json
-{
-  "status": "success"
-}
-```
+<br>
+
+## `고민 포인트`
+
