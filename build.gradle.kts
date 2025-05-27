@@ -38,7 +38,6 @@ dependencies {
         exclude(group = "commons-logging", module = "commons-logging")
     }
 
-
     // JWT
     implementation("javax.xml.bind:jaxb-api:2.3.1")
     implementation("io.jsonwebtoken:jjwt:0.9.1")
