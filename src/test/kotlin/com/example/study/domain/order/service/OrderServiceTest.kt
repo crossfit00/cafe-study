@@ -10,16 +10,18 @@ import com.example.study.domain.member.entity.MemberStatus
 import com.example.study.domain.member.service.MemberService
 import com.example.study.domain.order.api.OrderCreateRequest
 import com.example.study.domain.order.api.OrderItemRequest
+import com.example.study.domain.order.entity.OrderEntity
+import com.example.study.domain.order.entity.OrderStatus
 import com.example.study.domain.order.repository.OrderRepository
 import com.example.study.domain.payment.repository.PaymentHistoryRepository
 import com.example.study.domain.payment.repository.PaymentRepository
-import com.example.study.domain.payment.service.PaymentService
 import com.example.study.infra.client.PaymentClient
 import com.example.study.infra.redis.DistributedLockManager
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Nested
 import org.mockito.kotlin.any
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -45,74 +47,77 @@ class OrderServiceTest {
         cafePaymentRequestClient = cafePaymentRequestClient
     )
 
-    @Test
-    fun `주문 생성시 존재하지 않는 상품 아이디는 E404_NOT_FOUND 발생한다`() {
-        val member = MemberEntity(
-            name = "name",
-            phoneNumber = "010-1234-5678",
-            email = "email@example.com",
-            gender = Gender.MALE,
-            birth = LocalDate.of(1995, 11, 1),
-            status = MemberStatus.SERVICE
-        )
-
-        every { memberService.findById(any()) } returns member
-        every { itemService.findByIdIn(any()) } returns emptyList()
-
-        val exception = assertThrows(ApiException::class.java) {
-            orderService.create(
-                request = OrderCreateRequest(
-                    items = listOf(
-                        OrderItemRequest(
-                            itemId = 1L,
-                            quantity = 51
-                        )
-                    )
-                ),
-                memberId = member.id
+    @Nested
+    inner class OrderCreateTest {
+        @Test
+        fun `주문 생성시 존재하지 않는 상품 아이디는 E404_NOT_FOUND 발생한다`() {
+            val member = MemberEntity(
+                name = "name",
+                phoneNumber = "010-1234-5678",
+                email = "email@example.com",
+                gender = Gender.MALE,
+                birth = LocalDate.of(1995, 11, 1),
+                status = MemberStatus.SERVICE
             )
+
+            every { memberService.findById(any()) } returns member
+            every { itemService.findByIdIn(any()) } returns emptyList()
+
+            val exception = assertThrows(ApiException::class.java) {
+                orderService.create(
+                    request = OrderCreateRequest(
+                        items = listOf(
+                            OrderItemRequest(
+                                itemId = 1L,
+                                quantity = 51
+                            )
+                        )
+                    ),
+                    memberId = member.id
+                )
+            }
+
+            assertEquals(ErrorCode.E404_NOT_FOUND, exception.errorCode)
         }
 
-        assertEquals(ErrorCode.E404_NOT_FOUND, exception.errorCode)
-    }
-
-    @Test
-    fun `주문 요청 상품 수보다 상품 재고가 부족한 경우 E400_NOT_ENOUGH_STOCK 발생한다`() {
-        val member = MemberEntity(
-            name = "name",
-            phoneNumber = "010-1234-5678",
-            email = "email@example.com",
-            gender = Gender.MALE,
-            birth = LocalDate.of(1995, 11, 1),
-            status = MemberStatus.SERVICE
-        )
-
-        val item = ItemEntity(
-            name = "아이템",
-            price = BigDecimal(100),
-            stock = 10
-        )
-
-        item.id = 1L
-
-        every { memberService.findById(any()) } returns member
-        every { itemService.findByIdIn(any()) } returns listOf(item)
-
-        val exception = assertThrows(ApiException::class.java) {
-            orderService.create(
-                request = OrderCreateRequest(
-                    items = listOf(
-                        OrderItemRequest(
-                            itemId = 1L,
-                            quantity = 51
-                        )
-                    )
-                ),
-                memberId = member.id
+        @Test
+        fun `주문 요청 상품 수보다 상품 재고가 부족한 경우 E400_NOT_ENOUGH_STOCK 발생한다`() {
+            val member = MemberEntity(
+                name = "name",
+                phoneNumber = "010-1234-5678",
+                email = "email@example.com",
+                gender = Gender.MALE,
+                birth = LocalDate.of(1995, 11, 1),
+                status = MemberStatus.SERVICE
             )
-        }
 
-        assertEquals(ErrorCode.E400_NOT_ENOUGH_STOCK, exception.errorCode)
+            val item = ItemEntity(
+                name = "아이템",
+                price = BigDecimal(100),
+                stock = 10
+            )
+
+            item.id = 1L
+
+            every { memberService.findById(any()) } returns member
+            every { itemService.findByIdIn(any()) } returns listOf(item)
+
+            val exception = assertThrows(ApiException::class.java) {
+                orderService.create(
+                    request = OrderCreateRequest(
+                        items = listOf(
+                            OrderItemRequest(
+                                itemId = 1L,
+                                quantity = 51
+                            )
+                        )
+                    ),
+                    memberId = member.id
+                )
+            }
+
+            assertEquals(ErrorCode.E400_NOT_ENOUGH_STOCK, exception.errorCode)
+        }
     }
 
     @Test
@@ -124,5 +129,62 @@ class OrderServiceTest {
         }
 
         assertEquals(ErrorCode.E403_FORBIDDEN, exception.errorCode)
+    }
+
+    @Nested
+    inner class OrderCancelTest {
+        @Test
+        fun `주문 취소 상태가 아니면 E400_INVALID_ORDER_STATUS_FOR_PAYMENT 발생한다`() {
+            val member = MemberEntity(
+                name = "name",
+                phoneNumber = "010-1234-5678",
+                email = "email@example.com",
+                gender = Gender.MALE,
+                birth = LocalDate.of(1995, 11, 1),
+                status = MemberStatus.SERVICE
+            )
+
+            val order = OrderEntity(
+                totalPrice = BigDecimal(1000),
+                status = OrderStatus.PENDING_PAYMENT,
+                member = member,
+                orderItems = listOf()
+            )
+            every { orderRepository.findByIdAndMemberId(any(), any()) } returns order
+
+            val exception = assertThrows(ApiException::class.java) {
+                orderService.cancel(any(), any())
+            }
+
+            assertEquals(ErrorCode.E400_INVALID_ORDER_STATUS_FOR_PAYMENT, exception.errorCode)
+        }
+
+        @Test
+        fun `주문의 결제 내역이 존재하지 않으면 E404_PAYMENT_NOT_FOUND 발생한다`() {
+            val member = MemberEntity(
+                name = "name",
+                phoneNumber = "010-1234-5678",
+                email = "email@example.com",
+                gender = Gender.MALE,
+                birth = LocalDate.of(1995, 11, 1),
+                status = MemberStatus.SERVICE
+            )
+
+            val order = OrderEntity(
+                totalPrice = BigDecimal(1000),
+                status = OrderStatus.COMPLETED,
+                member = member,
+                orderItems = listOf()
+            )
+
+            every { orderRepository.findByIdAndMemberId(any(), any()) } returns order
+            every { paymentRepository.findByOrderId(any()) } returns listOf()
+
+            val exception = assertThrows(ApiException::class.java) {
+                orderService.cancel(any(), any())
+            }
+
+            assertEquals(ErrorCode.E404_PAYMENT_NOT_FOUND, exception.errorCode)
+        }
     }
 }

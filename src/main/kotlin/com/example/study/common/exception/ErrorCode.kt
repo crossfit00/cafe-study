@@ -24,6 +24,7 @@ enum class ErrorCode(
 
     // ------------------------------ 404 ------------------------------
     E404_NOT_FOUND(HttpStatus.NOT_FOUND, "000", "요청한 리소스가 존재하지 않는 경우 발생"),
+    E404_PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "001", "요청 주문에 맞는 결제가 존재하지 않습니다"),
 
     // ------------------------------ 405 ------------------------------
     E405_METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "000", "허용하지 않는 HTTP Method를 요청한 경우 발생"),

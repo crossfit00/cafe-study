@@ -27,7 +27,7 @@ class OrderApi(
     @DeleteMapping("/order/{orderId}/cancel")
     fun cancelOrder(@PathVariable orderId: Long): ApiResponse<Nothing> {
         val memberId = MemberContext.getMemberId()
-        orderService.cancelPayments(orderId, memberId)
+        orderService.cancel(orderId, memberId)
         return ApiResponse.success()
     }
 }

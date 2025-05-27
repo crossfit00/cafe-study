@@ -66,7 +66,7 @@ class OrderService(
     }
 
     @Transactional
-    fun cancelPayments(orderId: Long, memberId: Long) {
+    fun cancel(orderId: Long, memberId: Long) {
         val order = findByIdAndMemberId(orderId, memberId)
         if (!order.isPayCancelableOrderStatus()) {
             throw ApiException.from(
@@ -75,13 +75,20 @@ class OrderService(
             )
         }
 
-        val paymentsByOrder = paymentRepository.findByOrderId(order.id)
-        val paymentUUID = paymentsByOrder.first().uuid
+        val paymentsByOrders = paymentRepository.findByOrderId(order.id)
+        if (paymentsByOrders.isEmpty()) {
+            throw ApiException.from(
+                errorCode = ErrorCode.E404_PAYMENT_NOT_FOUND,
+                resultErrorMessage = "order(${order.id})에 맞는 payment 정보가 존자하지 않습니다."
+            )
+        }
+
+        val paymentUUID = paymentsByOrders.first().uuid
         cafePaymentRequestClient.cancelPayment(paymentUUID)
 
         val lockKey = DistributedLockKey.of(
             lockType = DistributedLockType.PAY,
-            key = "order:${order.id}:pay:$paymentUUID}"
+            key = "pc:${order.id}:$paymentUUID}"
         )
 
         distributedLockManager.executeWithLock(
@@ -94,7 +101,7 @@ class OrderService(
             order.cancel()
             orderRepository.save(order)
 
-            val paymentHistories = paymentsByOrder.map {
+            val paymentHistories = paymentsByOrders.map {
                 payment -> payment.cancel()
                 PaymentHistoryEntity(
                     payment = payment,
@@ -102,7 +109,7 @@ class OrderService(
                 )
             }
 
-            // TODO: 현재는 스펙상 JPA 사용하여 개발하지만, JPA 특성상 saveAll 사용하면 성능이 좋지 않기 때문에 MyBatis or JDBC Template 통해서 Bulk Insert 변경 필요함
+            // TODO: 현재는 스펙상 JPA 사용하여 개발하지만, JPA 특성상 saveAll 사용하면 성능이 좋지 않기 때문에 MyBatis or JDBC Template 통해서 Bulk Insert 변경해보면 좋을 듯
             paymentHistoryRepository.saveAll(paymentHistories)
         }
     }

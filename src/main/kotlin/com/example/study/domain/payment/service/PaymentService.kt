@@ -45,10 +45,9 @@ class PaymentService(
         }
 
         val orderItemKeys = order.orderItems.map { it.item.id }
-        // FIXME: Lock key 생성 로직 subKey() 함수 활용해서 리팩터링 해야 함
         val lockKey = DistributedLockKey.of(
             lockType = DistributedLockType.PAY,
-            key = "order:${order.id}:item:${orderItemKeys.joinToString(",")}"
+            key = "p:${order.id}:${orderItemKeys.joinToString(",")}"
         )
 
         distributedLockManager.executeWithLock(
@@ -58,7 +57,7 @@ class PaymentService(
                 resultErrorMessage = "결제 진행 중에 분산락 선점에 실패 했습니다. (lockKey = ${lockKey})"
             )
         ) {
-            // TODO: 현재는 스펙상 JPA 사용하지만 MyBatis or JDBC Template Bulk Update 고려해볼 수 있을 듯
+            // TODO: 현재는 스펙상 JPA 사용하지만 MyBatis or JDBC Template Bulk Update 고려해보면 좋을 듯
             order.orderItems.forEach { orderItem ->
                 val item = itemService.findById(orderItem.item.id)
                 item.decreaseStock(orderItem.quantity)
@@ -84,7 +83,7 @@ class PaymentService(
                 )
             }
 
-            // TODO: 현재는 스펙상 JPA 사용하여 개발하지만, JPA 특성상 saveAll 사용하면 성능이 좋지 않기 때문에 MyBatis or JDBC Template 통해서 Bulk Insert 변경 필요함
+            // TODO: 현재는 스펙상 JPA 사용하여 개발하지만, JPA 특성상 saveAll 사용하면 성능이 좋지 않기 때문에 MyBatis or JDBC Template 통해서 Bulk Insert 변경해보면 좋을 듯
             paymentRepository.saveAll(paymentEntities)
         }
     }
