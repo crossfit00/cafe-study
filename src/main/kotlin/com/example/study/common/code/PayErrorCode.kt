@@ -2,13 +2,6 @@ package com.example.study.common.code
 
 import org.springframework.http.HttpStatus
 
-/**
- * PayErrorCode
- *
- * @author JungGyun.Choi
- * @version 1.0.0
- * @since 2025. 05. 27.
- */
 enum class PayErrorCode(
     override val httpStatus: HttpStatus,
     override val minorStatus: String,
