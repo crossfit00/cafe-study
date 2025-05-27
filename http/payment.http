@@ -1,0 +1,18 @@
+### 결제 요청
+POST http://localhost:8080/payment
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwiZXhwIjoxNzQ4MzMyNzI3fQ.dr5ZoEzthb8r3QhyNVPB60FPSs21jnKraiZXNLmprGY
+
+{
+  "orderId": 1,
+  "payments": [
+    {
+      "amount": 40000,
+      "type": "NAVER_PAY"
+    },
+    {
+      "amount": 13000,
+      "type": "CARD"
+    }
+  ]
+}

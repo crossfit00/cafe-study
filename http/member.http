@@ -1,0 +1,16 @@
+### 회원가입
+POST http://localhost:8080/member
+Content-Type: application/json
+
+{
+  "name": "name11",
+  "email": "test@naver.com",
+  "phoneNumber": "010-1234-5678",
+  "gender": "MALE",
+  "birth": "1990-10-06"
+}
+
+### 탈퇴
+DELETE http://localhost:8080/member/2/withdraw
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwiZXhwIjoxNzQ4MzI1MDA0fQ.WgvYDIyGzdZFnuXzXklnI2pF4ekvjLqG3GspwWBgAj4
