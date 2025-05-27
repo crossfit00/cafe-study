@@ -21,6 +21,10 @@ class ItemEntity(
     @Column(name = "stock", nullable = false)
     var stock: Long
 ): BaseEntity() {
+    fun increaseStock(quantity: Int) {
+        this.stock += quantity
+    }
+
     fun decreaseStock(quantity: Int) {
         validateStock(quantity)
         this.stock -= quantity
