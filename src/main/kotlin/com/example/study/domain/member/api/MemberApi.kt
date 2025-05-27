@@ -1,8 +1,9 @@
 package com.example.study.domain.member.api
 
+import com.example.study.common.code.CommonErrorCode
 import com.example.study.common.exception.ApiException
 import com.example.study.common.exception.ApiResponse
-import com.example.study.common.exception.ErrorCode
+import com.example.study.common.code.ErrorCode
 import com.example.study.domain.member.service.MemberService
 import com.example.study.infra.aop.Auth
 import com.example.study.infra.aop.MemberContext
@@ -37,7 +38,7 @@ class MemberApi(
     ) {
         if (memberIdByRequest != memberIdByToken) {
             throw ApiException.from(
-                errorCode = ErrorCode.E403_FORBIDDEN,
+                errorCode = CommonErrorCode.E403_FORBIDDEN,
                 "memberIdByToken(${memberIdByToken})는 memberIdByRequest(${memberIdByRequest}) 멤버를 탈퇴할 권한이 없습니다."
             )
         }

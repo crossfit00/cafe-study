@@ -1,7 +1,9 @@
 package com.example.study.infra.redis
 
+import com.example.study.common.code.CommonErrorCode
 import com.example.study.common.exception.ApiException
-import com.example.study.common.exception.ErrorCode
+import com.example.study.common.code.ErrorCode
+import com.example.study.common.code.PayErrorCode
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -26,7 +28,7 @@ class DistributedLockManagerTest {
                 key = "key"
             ),
             failAcquireLockException = ApiException.from(
-                errorCode = ErrorCode.E500_PAYMENT_LOCK_ACQUIRE_FAIL_ERROR,
+                errorCode = PayErrorCode.E500_PAYMENT_LOCK_ACQUIRE_FAIL_ERROR,
                 resultErrorMessage = "분산락 선점에 실패 했습니다."
             )
         ) {
@@ -49,11 +51,11 @@ class DistributedLockManagerTest {
                     key = "key"
                 ),
                 failAcquireLockException = ApiException.from(
-                    errorCode = ErrorCode.E500_PAYMENT_LOCK_ACQUIRE_FAIL_ERROR,
+                    errorCode = PayErrorCode.E500_PAYMENT_LOCK_ACQUIRE_FAIL_ERROR,
                     resultErrorMessage = "분산락 선점에 실패 했습니다."
                 )
             ) {
-                throw ApiException.from(errorCode = ErrorCode.E500_INTERNAL_SERVER_ERROR)
+                throw ApiException.from(errorCode = CommonErrorCode.E500_INTERNAL_SERVER_ERROR)
             }
         }
 

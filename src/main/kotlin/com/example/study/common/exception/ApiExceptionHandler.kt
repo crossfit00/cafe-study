@@ -1,6 +1,8 @@
 package com.example.study.common.exception
 
 import com.example.study.common.Slf4j2KotlinLogging.log
+import com.example.study.common.code.CommonErrorCode
+import com.example.study.common.code.ErrorCode
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import jakarta.validation.ConstraintViolationException
 import org.springframework.http.converter.HttpMessageNotReadableException
@@ -13,7 +15,7 @@ class ApiExceptionHandler {
     @ExceptionHandler(ConstraintViolationException::class)
     private fun handlerConstraintViolationException(exception: ConstraintViolationException): ApiResponse<Nothing> {
         log.warn(exception.message)
-        return ApiResponse.fail(errorCode = ErrorCode.E400_BAD_REQUEST)
+        return ApiResponse.fail(errorCode = CommonErrorCode.E400_BAD_REQUEST)
     }
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
@@ -22,20 +24,20 @@ class ApiExceptionHandler {
         val rootCause = exception.rootCause
         if (rootCause is MismatchedInputException) {
             val missingField = rootCause.path?.lastOrNull()?.fieldName ?: "unknown"
-            return ApiResponse.fail(ErrorCode.E400_BAD_REQUEST, "Parameter ($missingField) is missing or invalid.")
+            return ApiResponse.fail(CommonErrorCode.E400_BAD_REQUEST, "Parameter ($missingField) is missing or invalid.")
         }
 
-        return ApiResponse.fail(ErrorCode.E400_BAD_REQUEST)
+        return ApiResponse.fail(CommonErrorCode.E400_BAD_REQUEST)
     }
 
     @ExceptionHandler(AuthException::class)
     private fun authException(exception: AuthException): ApiResponse<Nothing> {
-        var errorCode: ErrorCode = ErrorCode.E500_INTERNAL_SERVER_ERROR
+        var errorCode: ErrorCode = CommonErrorCode.E500_INTERNAL_SERVER_ERROR
         if (exception is TokenNotFoundException ||
             exception is TokenInvalidException
         ) {
             log.warn(exception.message)
-            errorCode = ErrorCode.E401_UNAUTHORIZED
+            errorCode = CommonErrorCode.E401_UNAUTHORIZED
         }
 
         return ApiResponse.fail(errorCode = errorCode)

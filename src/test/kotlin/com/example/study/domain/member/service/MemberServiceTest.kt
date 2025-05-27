@@ -1,7 +1,9 @@
 package com.example.study.domain.member.service
 
+import com.example.study.common.code.CommonErrorCode
 import com.example.study.common.exception.ApiException
-import com.example.study.common.exception.ErrorCode
+import com.example.study.common.code.ErrorCode
+import com.example.study.common.code.MemberErrorCode
 import com.example.study.domain.member.api.MemberRequest
 import com.example.study.domain.member.entity.Gender
 import com.example.study.domain.member.entity.MemberEntity
@@ -65,7 +67,7 @@ class MemberServiceTest {
                 memberService.register(request)
             }
 
-            assertEquals(ErrorCode.E400_EXIST_EMAIL, exception.errorCode)
+            assertEquals(MemberErrorCode.E400_EXIST_EMAIL, exception.errorCode)
         }
 
         @Test
@@ -76,7 +78,7 @@ class MemberServiceTest {
                 memberService.findById(1L)
             }
 
-            assertEquals(ErrorCode.E404_NOT_FOUND, exception.errorCode)
+            assertEquals(CommonErrorCode.E404_NOT_FOUND, exception.errorCode)
         }
 
         @Test
@@ -151,7 +153,7 @@ class MemberServiceTest {
                 memberService.withdraw(memberId)
             }
 
-            assertEquals(ErrorCode.E400_INVALID_MEMBER_STATUS_FOR_WITHDRAW, exception.errorCode)
+            assertEquals(MemberErrorCode.E400_INVALID_MEMBER_STATUS_FOR_WITHDRAW, exception.errorCode)
         }
     }
 }

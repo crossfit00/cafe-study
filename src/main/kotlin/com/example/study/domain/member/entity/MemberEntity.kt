@@ -1,7 +1,7 @@
 package com.example.study.domain.member.entity
 
+import com.example.study.common.code.MemberErrorCode
 import com.example.study.common.exception.ApiException
-import com.example.study.common.exception.ErrorCode
 import com.example.study.domain.BaseEntity
 import jakarta.persistence.*
 import java.time.LocalDate
@@ -33,7 +33,7 @@ class MemberEntity(
     fun updateWithDrawMember() {
         if (status != MemberStatus.SERVICE) {
             throw ApiException.from(
-                errorCode = ErrorCode.E400_INVALID_MEMBER_STATUS_FOR_WITHDRAW,
+                errorCode = MemberErrorCode.E400_INVALID_MEMBER_STATUS_FOR_WITHDRAW,
                 "Member Status($status)가 SERVICE 상태가 아닙니다.."
             )
         }

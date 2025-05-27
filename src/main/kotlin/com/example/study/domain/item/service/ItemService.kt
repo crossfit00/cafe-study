@@ -1,7 +1,8 @@
 package com.example.study.domain.item.service
 
+import com.example.study.common.code.CommonErrorCode
 import com.example.study.common.exception.ApiException
-import com.example.study.common.exception.ErrorCode
+import com.example.study.common.code.ErrorCode
 import com.example.study.domain.item.entity.ItemEntity
 import com.example.study.domain.item.repository.ItemRepository
 import org.springframework.data.repository.findByIdOrNull
@@ -18,7 +19,7 @@ class ItemService(
 
     fun findById(itemId: Long): ItemEntity {
         return itemRepository.findByIdOrNull(itemId) ?: throw ApiException.from(
-            errorCode = ErrorCode.E404_NOT_FOUND,
+            errorCode = CommonErrorCode.E404_NOT_FOUND,
             resultErrorMessage = "itemId($itemId)에 해당하는 리소스가 존재하지 않습니다."
         )
     }

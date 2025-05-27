@@ -1,7 +1,10 @@
 package com.example.study.domain.member.service
 
 import com.example.study.common.exception.ApiException
-import com.example.study.common.exception.ErrorCode
+import com.example.study.common.code.CommonErrorCode
+import com.example.study.common.code.ErrorCode
+import com.example.study.common.code.MemberErrorCode
+import com.example.study.common.code.PayErrorCode
 import com.example.study.domain.member.api.MemberRequest
 import com.example.study.domain.member.entity.MemberEntity
 import com.example.study.domain.member.entity.MemberHistoryEntity
@@ -34,13 +37,13 @@ class MemberService(
         return distributedLockManager.executeWithLock(
             lockKey = lockKey,
             failAcquireLockException = ApiException.from(
-                errorCode = ErrorCode.E500_PAYMENT_LOCK_ACQUIRE_FAIL_ERROR,
+                errorCode = PayErrorCode.E500_PAYMENT_LOCK_ACQUIRE_FAIL_ERROR,
                 resultErrorMessage = "결제 진행 중에 분산락 선점에 실패 했습니다. (lockKey = ${lockKey})"
             )
         ) {
             val email = request.email
             if (memberRepository.existsByEmail(email)) {
-                throw ApiException.from(ErrorCode.E400_EXIST_EMAIL, "요청 이메일($email)는 이미 존재합니다.")
+                throw ApiException.from(MemberErrorCode.E400_EXIST_EMAIL, "요청 이메일($email)는 이미 존재합니다.")
             }
 
             return@executeWithLock memberRepository.save(request.toEntity()).id
@@ -59,6 +62,6 @@ class MemberService(
 
     fun findById(memberId: Long): MemberEntity {
         return memberRepository.findByIdOrNull(memberId)
-            ?: throw ApiException.from(errorCode = ErrorCode.E404_NOT_FOUND, "memberId($memberId)의 Member가 존재하지 않습니다.")
+            ?: throw ApiException.from(errorCode = CommonErrorCode.E404_NOT_FOUND, "memberId($memberId)의 Member가 존재하지 않습니다.")
     }
 }

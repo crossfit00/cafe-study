@@ -1,7 +1,10 @@
 package com.example.study.domain.order.service
 
+import com.example.study.common.code.CommonErrorCode
 import com.example.study.common.exception.ApiException
-import com.example.study.common.exception.ErrorCode
+import com.example.study.common.code.ErrorCode
+import com.example.study.common.code.OrderErrorCode
+import com.example.study.common.code.PayErrorCode
 import com.example.study.domain.item.entity.ItemEntity
 import com.example.study.domain.item.service.ItemService
 import com.example.study.domain.member.entity.Gender
@@ -77,7 +80,7 @@ class OrderServiceTest {
                 )
             }
 
-            assertEquals(ErrorCode.E404_NOT_FOUND, exception.errorCode)
+            assertEquals(CommonErrorCode.E404_NOT_FOUND, exception.errorCode)
         }
 
         @Test
@@ -116,7 +119,7 @@ class OrderServiceTest {
                 )
             }
 
-            assertEquals(ErrorCode.E400_NOT_ENOUGH_STOCK, exception.errorCode)
+            assertEquals(OrderErrorCode.E400_NOT_ENOUGH_STOCK, exception.errorCode)
         }
     }
 
@@ -128,7 +131,7 @@ class OrderServiceTest {
             orderService.findByIdAndMemberId(any(), any())
         }
 
-        assertEquals(ErrorCode.E403_FORBIDDEN, exception.errorCode)
+        assertEquals(CommonErrorCode.E403_FORBIDDEN, exception.errorCode)
     }
 
     @Nested
@@ -156,11 +159,11 @@ class OrderServiceTest {
                 orderService.cancel(any(), any())
             }
 
-            assertEquals(ErrorCode.E400_INVALID_ORDER_STATUS_FOR_PAYMENT, exception.errorCode)
+            assertEquals(OrderErrorCode.E400_INVALID_ORDER_STATUS_FOR_PAYMENT, exception.errorCode)
         }
 
         @Test
-        fun `주문의 결제 내역이 존재하지 않으면 E404_PAYMENT_NOT_FOUND 발생한다`() {
+        fun `주문의 결제 내역이 존재하지 않으면 E404_NOT_FOUND 발생한다`() {
             val member = MemberEntity(
                 name = "name",
                 phoneNumber = "010-1234-5678",
@@ -184,7 +187,7 @@ class OrderServiceTest {
                 orderService.cancel(any(), any())
             }
 
-            assertEquals(ErrorCode.E404_PAYMENT_NOT_FOUND, exception.errorCode)
+            assertEquals(CommonErrorCode.E404_NOT_FOUND, exception.errorCode)
         }
     }
 }

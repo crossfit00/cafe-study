@@ -1,5 +1,6 @@
 package com.example.study.common.exception
 
+import com.example.study.common.code.ErrorCode
 import com.fasterxml.jackson.annotation.JsonInclude
 
 @JsonInclude(JsonInclude.Include.NON_NULL)

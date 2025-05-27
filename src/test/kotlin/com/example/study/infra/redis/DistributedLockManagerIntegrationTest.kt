@@ -1,7 +1,8 @@
 package com.example.study.infra.redis
 
+import com.example.study.common.code.CommonErrorCode
 import com.example.study.common.exception.ApiException
-import com.example.study.common.exception.ErrorCode
+import com.example.study.common.code.ErrorCode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,7 +22,7 @@ class DistributedLockManagerIntegrationTest {
     fun `분산 락을 획득하면 키가 생성된다`() {
         distributedLockManager.executeWithLock(
             lockKey = lockKey,
-            failAcquireLockException = ApiException.from(ErrorCode.E500_INTERNAL_SERVER_ERROR)
+            failAcquireLockException = ApiException.from(CommonErrorCode.E500_INTERNAL_SERVER_ERROR)
         ) {
             val result = redisTemplate.opsForValue().get(lockKey.keyString())
             assertThat(result).isNotNull()
@@ -32,7 +33,7 @@ class DistributedLockManagerIntegrationTest {
     fun `분산 락을 해제하면 키가 삭제된다`() {
         distributedLockManager.executeWithLock(
             lockKey = lockKey,
-            failAcquireLockException = ApiException.from(ErrorCode.E500_INTERNAL_SERVER_ERROR)
+            failAcquireLockException = ApiException.from(CommonErrorCode.E500_INTERNAL_SERVER_ERROR)
         ) {
         }
 

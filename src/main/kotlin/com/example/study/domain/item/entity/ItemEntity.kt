@@ -1,7 +1,8 @@
 package com.example.study.domain.item.entity
 
 import com.example.study.common.exception.ApiException
-import com.example.study.common.exception.ErrorCode
+import com.example.study.common.code.ErrorCode
+import com.example.study.common.code.OrderErrorCode
 import com.example.study.domain.BaseEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -28,7 +29,7 @@ class ItemEntity(
     fun validateStock(quantity: Int) {
         if (this.stock < quantity) {
             throw ApiException.from(
-                errorCode = ErrorCode.E400_NOT_ENOUGH_STOCK,
+                errorCode = OrderErrorCode.E400_NOT_ENOUGH_STOCK,
                 "상품(${this.id})의 재고가 부족합니다. (요청 수량: $quantity, 남은 수량: ${this.stock})"
             )
         }

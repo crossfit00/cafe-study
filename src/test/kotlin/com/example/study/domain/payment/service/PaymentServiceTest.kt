@@ -1,7 +1,9 @@
 package com.example.study.domain.payment.service
 
 import com.example.study.common.exception.ApiException
-import com.example.study.common.exception.ErrorCode
+import com.example.study.common.code.ErrorCode
+import com.example.study.common.code.OrderErrorCode
+import com.example.study.common.code.PayErrorCode
 import com.example.study.domain.item.service.ItemService
 import com.example.study.domain.member.entity.Gender
 import com.example.study.domain.member.entity.MemberEntity
@@ -78,7 +80,7 @@ class PaymentServiceTest {
             )
         }
 
-        assertEquals(ErrorCode.E400_INVALID_ORDER_STATUS_FOR_PAYMENT, exception.errorCode)
+        assertEquals(OrderErrorCode.E400_INVALID_ORDER_STATUS_FOR_PAYMENT, exception.errorCode)
     }
 
     @Test
@@ -97,6 +99,6 @@ class PaymentServiceTest {
             )
         }
 
-        assertEquals(ErrorCode.E400_INVALID_ORDER_STATUS_FOR_PAYMENT, exception.errorCode)
+        assertEquals(OrderErrorCode.E400_INVALID_ORDER_STATUS_FOR_PAYMENT, exception.errorCode)
     }
 }

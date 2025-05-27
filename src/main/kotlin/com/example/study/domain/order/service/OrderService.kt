@@ -1,7 +1,10 @@
 package com.example.study.domain.order.service
 
+import com.example.study.common.code.CommonErrorCode
 import com.example.study.common.exception.ApiException
-import com.example.study.common.exception.ErrorCode
+import com.example.study.common.code.ErrorCode
+import com.example.study.common.code.OrderErrorCode
+import com.example.study.common.code.PayErrorCode
 import com.example.study.domain.item.entity.ItemEntity
 import com.example.study.domain.item.service.ItemService
 import com.example.study.domain.member.service.MemberService
@@ -11,10 +14,8 @@ import com.example.study.domain.order.entity.OrderItemEntity
 import com.example.study.domain.order.entity.OrderStatus
 import com.example.study.domain.order.repository.OrderRepository
 import com.example.study.domain.payment.entity.PaymentHistoryEntity
-import com.example.study.domain.payment.entity.PaymentStatus
 import com.example.study.domain.payment.repository.PaymentHistoryRepository
 import com.example.study.domain.payment.repository.PaymentRepository
-import com.example.study.infra.client.CafePaymentRequestClient
 import com.example.study.infra.client.PaymentClient
 import com.example.study.infra.redis.DistributedLockKey
 import com.example.study.infra.redis.DistributedLockManager
@@ -43,7 +44,7 @@ class OrderService(
 
         val orderItemEntities = items.map { orderItem ->
             val item = itemMaps[orderItem.itemId] ?: throw ApiException.from(
-                errorCode = ErrorCode.E404_NOT_FOUND,
+                errorCode = CommonErrorCode.E404_NOT_FOUND,
                 "ItemId(${orderItem.itemId})에 해당하는 상품이 존재하지 않습니다."
             )
 
@@ -70,7 +71,7 @@ class OrderService(
         val order = findByIdAndMemberId(orderId, memberId)
         if (!order.isPayCancelableOrderStatus()) {
             throw ApiException.from(
-                errorCode = ErrorCode.E400_INVALID_ORDER_STATUS_FOR_PAYMENT,
+                errorCode = OrderErrorCode.E400_INVALID_ORDER_STATUS_FOR_PAYMENT,
                 resultErrorMessage = "memberId(${memberId}), orderId(${order.id})의 status(${order.status})가 주문 완료 상태가 아니어서 주문 취소를 진행할 수 없습니다."
             )
         }
@@ -78,7 +79,7 @@ class OrderService(
         val paymentsByOrders = paymentRepository.findByOrderId(order.id)
         if (paymentsByOrders.isEmpty()) {
             throw ApiException.from(
-                errorCode = ErrorCode.E404_PAYMENT_NOT_FOUND,
+                errorCode = CommonErrorCode.E404_NOT_FOUND,
                 resultErrorMessage = "order(${order.id})에 맞는 payment 정보가 존자하지 않습니다."
             )
         }
@@ -94,7 +95,7 @@ class OrderService(
         distributedLockManager.executeWithLock(
             lockKey = lockKey,
             failAcquireLockException = ApiException.from(
-                errorCode = ErrorCode.E500_PAYMENT_LOCK_ACQUIRE_FAIL_ERROR,
+                errorCode = PayErrorCode.E500_PAYMENT_LOCK_ACQUIRE_FAIL_ERROR,
                 resultErrorMessage = "주문 취소 진행 중에 분산락 선점에 실패 했습니다. (lockKey = ${lockKey})"
             )
         ) {
@@ -121,7 +122,7 @@ class OrderService(
 
     fun findByIdAndMemberId(orderId: Long, memberId: Long): OrderEntity {
         return orderRepository.findByIdAndMemberId(orderId, memberId) ?: throw ApiException.from(
-            errorCode = ErrorCode.E403_FORBIDDEN,
+            errorCode = CommonErrorCode.E403_FORBIDDEN,
             resultErrorMessage = "memberId($memberId)가 주문한 orderId($orderId)에 해당하는 주문이 존재하지 않습니다."
         )
     }

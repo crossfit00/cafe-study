@@ -1,7 +1,9 @@
 package com.example.study.domain.payment.service
 
 import com.example.study.common.exception.ApiException
-import com.example.study.common.exception.ErrorCode
+import com.example.study.common.code.ErrorCode
+import com.example.study.common.code.OrderErrorCode
+import com.example.study.common.code.PayErrorCode
 import com.example.study.domain.item.service.ItemService
 import com.example.study.domain.order.entity.OrderHistoryEntity
 import com.example.study.domain.order.entity.OrderStatus
@@ -32,14 +34,14 @@ class PaymentService(
         val order = orderService.findByIdAndMemberId(request.orderId, memberId)
         if (!order.isPayableOrderStatus()) {
             throw ApiException.from(
-                errorCode = ErrorCode.E400_INVALID_ORDER_STATUS_FOR_PAYMENT,
+                errorCode = OrderErrorCode.E400_INVALID_ORDER_STATUS_FOR_PAYMENT,
                 resultErrorMessage = "orderId(${order.id})의 status(${order.status})가 주문 대기 상태가 아니어서 결제를 진행할 수 없습니다."
             )
         }
 
         if (order.totalPrice != request.totalAmount()) {
             throw ApiException.from(
-                errorCode = ErrorCode.E400_INVALID_ORDER_TOTAL_PRICE,
+                errorCode = PayErrorCode.E400_INVALID_ORDER_TOTAL_PRICE,
                 resultErrorMessage = "주문 총 금액과(${order.totalPrice})의 결제 요청 금액(${request.totalAmount()})이 달라서 결제를 진행할 수 없습니다."
             )
         }
@@ -53,7 +55,7 @@ class PaymentService(
         distributedLockManager.executeWithLock(
             lockKey = lockKey,
             failAcquireLockException = ApiException.from(
-                errorCode = ErrorCode.E500_PAYMENT_LOCK_ACQUIRE_FAIL_ERROR,
+                errorCode = PayErrorCode.E500_PAYMENT_LOCK_ACQUIRE_FAIL_ERROR,
                 resultErrorMessage = "결제 진행 중에 분산락 선점에 실패 했습니다. (lockKey = ${lockKey})"
             )
         ) {

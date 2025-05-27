@@ -1,5 +1,7 @@
 package com.example.study.common.exception
 
+import com.example.study.common.code.ErrorCode
+
 class ApiException private constructor(
     val errorCode: ErrorCode,
     val resultErrorMessage: String?,

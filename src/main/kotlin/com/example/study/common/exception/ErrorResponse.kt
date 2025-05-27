@@ -1,5 +1,6 @@
 package com.example.study.common.exception
 
+import com.example.study.common.code.ErrorCode
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.apache.commons.lang3.StringUtils
@@ -16,13 +17,13 @@ class ErrorResponse(
 
     @JsonProperty("code")
     fun getCode(): String {
-        return errorCode.getCode()
+        return errorCode.code
     }
 
-    @JsonProperty("typeMessage")
-    fun getTypeMessage(): String {
-        return errorCode.name
-    }
+//    @JsonProperty("typeMessage")
+//    fun getTypeMessage(): String {
+//        return errorCode.name
+//    }
 
     @JsonProperty("detailMessage")
     fun getDetailMessage(): String? {
