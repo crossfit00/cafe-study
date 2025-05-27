@@ -11,6 +11,8 @@
 
 ## `ERD`
 
+<img width="1117" alt="Image" src="https://github.com/user-attachments/assets/847244a1-3b75-44ee-b9f3-74976f427b4e" />
+
 <br>
 
 ## `API 명세서`
