@@ -49,7 +49,7 @@ class PaymentService(
         val orderItemKeys = order.orderItems.map { it.item.id }
         val lockKey = DistributedLockKey.of(
             lockType = DistributedLockType.PAY,
-            key = "p:${order.id}:${orderItemKeys.joinToString(",")}"
+            key = DistributedLockKey.makeCreateOrderKey(order.id, orderItemKeys)
         )
 
         distributedLockManager.executeWithLock(

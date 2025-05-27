@@ -25,5 +25,13 @@ data class DistributedLockKey(
                 ttlDuration = Duration.ofSeconds(10),
             )
         }
+
+        fun makeCreateOrderKey(orderId: Long, orderItemKeys: List<Long>): String {
+            return "p:${orderId}:${orderItemKeys.joinToString(",")}"
+        }
+
+        fun makeCancelOrderKey(orderId: Long, paymentUUID: String): String {
+            return "pc:${orderId}:$paymentUUID}"
+        }
     }
 }

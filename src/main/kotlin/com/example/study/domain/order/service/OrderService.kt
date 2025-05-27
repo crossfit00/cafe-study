@@ -1,10 +1,9 @@
 package com.example.study.domain.order.service
 
 import com.example.study.common.code.CommonErrorCode
-import com.example.study.common.exception.ApiException
-import com.example.study.common.code.ErrorCode
 import com.example.study.common.code.OrderErrorCode
 import com.example.study.common.code.PayErrorCode
+import com.example.study.common.exception.ApiException
 import com.example.study.domain.item.entity.ItemEntity
 import com.example.study.domain.item.repository.ItemRepository
 import com.example.study.domain.item.service.ItemService
@@ -92,7 +91,7 @@ class OrderService(
 
         val lockKey = DistributedLockKey.of(
             lockType = DistributedLockType.PAY,
-            key = "pc:${order.id}:$paymentUUID}"
+            key = DistributedLockKey.makeCancelOrderKey(order.id, paymentUUID)
         )
 
         distributedLockManager.executeWithLock(
