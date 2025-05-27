@@ -1,13 +1,10 @@
 package com.example.study.domain.payment.service
 
-import com.example.study.common.exception.ApiException
-import com.example.study.common.code.ErrorCode
 import com.example.study.common.code.OrderErrorCode
 import com.example.study.common.code.PayErrorCode
+import com.example.study.common.exception.ApiException
 import com.example.study.domain.item.service.ItemService
-import com.example.study.domain.order.entity.OrderHistoryEntity
 import com.example.study.domain.order.entity.OrderStatus
-import com.example.study.domain.order.repository.OrderHistoryRepository
 import com.example.study.domain.order.service.OrderService
 import com.example.study.domain.payment.api.PaymentRequest
 import com.example.study.domain.payment.entity.PaymentEntity
@@ -25,7 +22,6 @@ class PaymentService(
     private val orderService: OrderService,
     private val itemService: ItemService,
     private val paymentRepository: PaymentRepository,
-    private val orderHistoryRepository: OrderHistoryRepository,
     private val distributedLockManager: DistributedLockManager,
     private val cafePaymentRequestClient: PaymentClient
 ) {
@@ -67,12 +63,6 @@ class PaymentService(
 
             order.status = OrderStatus.COMPLETED
             orderService.save(order)
-            val orderHistory = OrderHistoryEntity(
-                order = order,
-                status = order.status
-            )
-
-            orderHistoryRepository.save(orderHistory)
 
             val paymentUUID = cafePaymentRequestClient.makePayment()
             val paymentEntities = request.payments.map { payment ->

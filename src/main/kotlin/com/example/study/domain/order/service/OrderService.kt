@@ -10,8 +10,10 @@ import com.example.study.domain.item.service.ItemService
 import com.example.study.domain.member.service.MemberService
 import com.example.study.domain.order.api.OrderCreateRequest
 import com.example.study.domain.order.entity.OrderEntity
+import com.example.study.domain.order.entity.OrderHistoryEntity
 import com.example.study.domain.order.entity.OrderItemEntity
 import com.example.study.domain.order.entity.OrderStatus
+import com.example.study.domain.order.repository.OrderHistoryRepository
 import com.example.study.domain.order.repository.OrderRepository
 import com.example.study.domain.payment.entity.PaymentHistoryEntity
 import com.example.study.domain.payment.repository.PaymentHistoryRepository
@@ -30,6 +32,7 @@ class OrderService(
     private val itemService: ItemService,
     private val memberService: MemberService,
     private val orderRepository: OrderRepository,
+    private val orderHistoryRepository: OrderHistoryRepository,
     private val paymentRepository: PaymentRepository,
     private val itemRepository: ItemRepository,
     private val paymentHistoryRepository: PaymentHistoryRepository,
@@ -112,6 +115,13 @@ class OrderService(
 
             order.cancel()
             orderRepository.save(order)
+
+            val orderHistory = OrderHistoryEntity(
+                order = order,
+                status = order.status
+            )
+
+            orderHistoryRepository.save(orderHistory)
 
             val paymentHistories = paymentsByOrders.map {
                 payment -> payment.cancel()
