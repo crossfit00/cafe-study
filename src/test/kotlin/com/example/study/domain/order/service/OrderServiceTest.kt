@@ -1,11 +1,10 @@
 package com.example.study.domain.order.service
 
 import com.example.study.common.code.CommonErrorCode
-import com.example.study.common.exception.ApiException
-import com.example.study.common.code.ErrorCode
 import com.example.study.common.code.OrderErrorCode
-import com.example.study.common.code.PayErrorCode
+import com.example.study.common.exception.ApiException
 import com.example.study.domain.item.entity.ItemEntity
+import com.example.study.domain.item.repository.ItemRepository
 import com.example.study.domain.item.service.ItemService
 import com.example.study.domain.member.entity.Gender
 import com.example.study.domain.member.entity.MemberEntity
@@ -36,6 +35,7 @@ class OrderServiceTest {
     private val memberService: MemberService = mockk()
     private val orderRepository: OrderRepository = mockk()
     private val paymentRepository: PaymentRepository = mockk()
+    private val itemRepository: ItemRepository = mockk()
     private val paymentHistoryRepository: PaymentHistoryRepository = mockk()
     private val distributedLockManager: DistributedLockManager = mockk()
     private val cafePaymentRequestClient: PaymentClient = mockk()
@@ -45,6 +45,7 @@ class OrderServiceTest {
         memberService = memberService,
         orderRepository = orderRepository,
         paymentRepository = paymentRepository,
+        itemRepository = itemRepository,
         paymentHistoryRepository = paymentHistoryRepository,
         distributedLockManager = distributedLockManager,
         cafePaymentRequestClient = cafePaymentRequestClient

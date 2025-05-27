@@ -6,6 +6,7 @@ import com.example.study.common.code.ErrorCode
 import com.example.study.common.code.OrderErrorCode
 import com.example.study.common.code.PayErrorCode
 import com.example.study.domain.item.entity.ItemEntity
+import com.example.study.domain.item.repository.ItemRepository
 import com.example.study.domain.item.service.ItemService
 import com.example.study.domain.member.service.MemberService
 import com.example.study.domain.order.api.OrderCreateRequest
@@ -20,6 +21,7 @@ import com.example.study.infra.client.PaymentClient
 import com.example.study.infra.redis.DistributedLockKey
 import com.example.study.infra.redis.DistributedLockManager
 import com.example.study.infra.redis.DistributedLockType
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -30,6 +32,7 @@ class OrderService(
     private val memberService: MemberService,
     private val orderRepository: OrderRepository,
     private val paymentRepository: PaymentRepository,
+    private val itemRepository: ItemRepository,
     private val paymentHistoryRepository: PaymentHistoryRepository,
     private val distributedLockManager: DistributedLockManager,
     private val cafePaymentRequestClient: PaymentClient
@@ -99,6 +102,15 @@ class OrderService(
                 resultErrorMessage = "주문 취소 진행 중에 분산락 선점에 실패 했습니다. (lockKey = ${lockKey})"
             )
         ) {
+            order.orderItems.forEach { orderItem ->
+                val item = itemRepository.findByIdOrNull(orderItem.item.id) ?: throw ApiException.from(
+                    errorCode = CommonErrorCode.E404_NOT_FOUND,
+                    resultErrorMessage = "itemId(${orderItem.item.id})에 해당하는 상품이 존재하지 않습니다."
+                )
+
+                item.increaseStock(orderItem.quantity)
+            }
+
             order.cancel()
             orderRepository.save(order)
 
