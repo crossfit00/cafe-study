@@ -16,6 +16,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.repository.findByIdOrNull
@@ -35,116 +36,122 @@ class MemberServiceTest {
         memberHistoryRepository = memberHistoryRepository
     )
 
-    @Test
-    fun `이미 존재하는 이메일이면 E404_NOT_FOUND 예외를 발생시킨다`() {
-        val request = MemberRequest(
-            name = "name",
-            email = "wjdrbs966@naver.com",
-            gender = Gender.MALE,
-            phoneNumber = "010-1234-5678",
-            birth = LocalDate.of(1994, 11, 5)
-        )
-
-        every {
-            distributedLockManager.executeWithLock<Long>(
-                any(),
-                any(),
-                any()
+    @Nested
+    inner class CreateMemberTest {
+        @Test
+        fun `이미 존재하는 이메일이면 E404_NOT_FOUND 예외를 발생시킨다`() {
+            val request = MemberRequest(
+                name = "name",
+                email = "wjdrbs966@naver.com",
+                gender = Gender.MALE,
+                phoneNumber = "010-1234-5678",
+                birth = LocalDate.of(1994, 11, 5)
             )
-        } answers {
-            val block = args[2] as () -> Long
-            block()
+
+            every {
+                distributedLockManager.executeWithLock<Long>(
+                    any(),
+                    any(),
+                    any()
+                )
+            } answers {
+                val block = args[2] as () -> Long
+                block()
+            }
+
+            every { memberRepository.existsByEmail(request.email) }.returns(true)
+
+            val exception = assertThrows(ApiException::class.java) {
+                memberService.register(request)
+            }
+
+            assertEquals(ErrorCode.E400_EXIST_EMAIL, exception.errorCode)
         }
 
-        every { memberRepository.existsByEmail(request.email) }.returns(true)
+        @Test
+        fun `존재하지 않는 멤버이면 E404_NOT_FOUND 예외를 발생시킨다`() {
+            every { memberRepository.findByIdOrNull(1L) } returns null
 
-        val exception = assertThrows(ApiException::class.java) {
+            val exception = assertThrows(ApiException::class.java) {
+                memberService.findById(1L)
+            }
+
+            assertEquals(ErrorCode.E404_NOT_FOUND, exception.errorCode)
+        }
+
+        @Test
+        fun `회원 가입이 정상적으로 진행된다`() {
+            val request = MemberRequest(
+                name = "name",
+                email = "wjdrbs966@naver.com",
+                gender = Gender.MALE,
+                phoneNumber = "010-1234-5678",
+                birth = LocalDate.of(1994, 11, 5)
+            )
+
+            every {
+                distributedLockManager.executeWithLock<Long>(
+                    any(),
+                    any(),
+                    any()
+                )
+            } answers {
+                val block = args[2] as () -> Long
+                block()
+            }
+
+            every { memberRepository.existsByEmail(any()) } returns false
+            every { memberRepository.save(any()) } returns request.toEntity() // return 값 반환하기 때문에 Mocking 필요함
+
             memberService.register(request)
+            verify(exactly = 1) { memberRepository.save(any()) }
         }
-
-        assertEquals(ErrorCode.E400_EXIST_EMAIL, exception.errorCode)
     }
 
-    @Test
-    fun `존재하지 않는 멤버이면 E404_NOT_FOUND 예외를 발생시킨다`() {
-        every { memberRepository.findByIdOrNull(1L) } returns null
+    @Nested
+    inner class WithDrawMemberTest {
+        @Test
+        fun `회원 탈퇴가 정상적으로 진행된다`() {
+            val memberEntity = mockk<MemberEntity>(relaxed = true)
+            memberEntity.id = 1L
 
-        val exception = assertThrows(ApiException::class.java) {
-            memberService.findById(1L)
-        }
-
-        assertEquals(ErrorCode.E404_NOT_FOUND, exception.errorCode)
-    }
-
-    @Test
-    fun `회원 가입이 정상적으로 진행된다`() {
-        val request = MemberRequest(
-            name = "name",
-            email = "wjdrbs966@naver.com",
-            gender = Gender.MALE,
-            phoneNumber = "010-1234-5678",
-            birth = LocalDate.of(1994, 11, 5)
-        )
-
-        every {
-            distributedLockManager.executeWithLock<Long>(
-                any(),
-                any(),
-                any()
+            val memberHistoryEntity = MemberHistoryEntity(
+                member = memberEntity,
+                status = MemberStatus.WITHDRAWN
             )
-        } answers {
-            val block = args[2] as () -> Long
-            block()
+
+            every { memberRepository.findByIdOrNull(memberEntity.id) } returns memberEntity
+            every { memberHistoryRepository.save(any()) } returns memberHistoryEntity
+            every { applicationEventPublisher.publishEvent(MemberHistoryEvent(memberId = memberEntity.id)) } returns Unit
+
+            memberService.withdraw(memberEntity.id)
+
+            verify(exactly = 1) { memberEntity.updateWithDrawMember() }
+            verify(exactly = 1) { memberHistoryRepository.save(any()) }
         }
 
-        every { memberRepository.existsByEmail(any()) } returns false
-        every { memberRepository.save(any()) } returns request.toEntity() // return 값 반환하기 때문에 Mocking 필요함
+        @Test
+        fun `회원 탈퇴시 멤버 Status가 SERVICE가 아니면 E400_INVALID_MEMBER_STATUS_FOR_WITHDRAW 발생한다`() {
+            val memberId = 1L
+            val memberEntity = MemberEntity(
+                name = "name",
+                email = "wjdrbs966@naver.com",
+                gender = Gender.MALE,
+                phoneNumber = "010-1234-5678",
+                birth = LocalDate.of(1994, 11, 5),
+                status = MemberStatus.WITHDRAWN
+            )
 
-        memberService.register(request)
-        verify(exactly = 1) { memberRepository.save(any()) }
-    }
+            val memberHistoryEntity = mockk<MemberHistoryEntity>()
 
-    @Test
-    fun `회원 탈퇴가 정상적으로 진행된다`() {
-        val memberEntity = mockk<MemberEntity>(relaxed = true)
-        memberEntity.id = 1L
+            every { memberRepository.findById(memberId) } returns Optional.of(memberEntity)
+            every { memberHistoryRepository.save(any()) } returns memberHistoryEntity
 
-        val memberHistoryEntity = MemberHistoryEntity(
-            member = memberEntity,
-            status = MemberStatus.WITHDRAWN
-        )
+            val exception = assertThrows(ApiException::class.java) {
+                memberService.withdraw(memberId)
+            }
 
-        every { memberRepository.findByIdOrNull(memberEntity.id) } returns memberEntity
-        every { memberHistoryRepository.save(any()) } returns memberHistoryEntity
-        every { applicationEventPublisher.publishEvent(MemberHistoryEvent(memberId = memberEntity.id)) } returns Unit
-
-        memberService.withdraw(memberEntity.id)
-
-        verify(exactly = 1) { memberEntity.updateWithDrawMember() }
-        verify(exactly = 1) { memberHistoryRepository.save(any()) }
-    }
-
-    @Test
-    fun `회원 탈퇴시 멤버 Status가 SERVICE가 아니면 E400_INVALID_MEMBER_STATUS_FOR_WITHDRAW 발생한다`() {
-        val memberId = 1L
-        val memberEntity = MemberEntity(
-            name = "name",
-            email = "wjdrbs966@naver.com",
-            gender = Gender.MALE,
-            phoneNumber = "010-1234-5678",
-            birth = LocalDate.of(1994, 11, 5),
-            status = MemberStatus.WITHDRAWN
-        )
-
-        val memberHistoryEntity = mockk<MemberHistoryEntity>()
-
-        every { memberRepository.findById(memberId) } returns Optional.of(memberEntity)
-        every { memberHistoryRepository.save(any()) } returns memberHistoryEntity
-
-        val exception = assertThrows(ApiException::class.java) {
-            memberService.withdraw(memberId)
+            assertEquals(ErrorCode.E400_INVALID_MEMBER_STATUS_FOR_WITHDRAW, exception.errorCode)
         }
-
-        assertEquals(ErrorCode.E400_INVALID_MEMBER_STATUS_FOR_WITHDRAW, exception.errorCode)
     }
 }
