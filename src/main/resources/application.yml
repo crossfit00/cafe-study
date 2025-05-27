@@ -19,5 +19,5 @@ spring:
       enabled: true
 
 jwt:
-  secret-key: secretKey
-  valid-time: 1800000
+  secret-key: secretKey  # TODO: 추후 암호화 하도록 고도화 필요
+  valid-time: 1800000    # TODO: 추후 암호화 하도록 고도화 필요
