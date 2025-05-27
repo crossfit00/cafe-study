@@ -1,17 +1,13 @@
 package com.example.study.domain.payment.service
 
-import com.example.study.common.exception.ApiException
-import com.example.study.common.code.ErrorCode
 import com.example.study.common.code.OrderErrorCode
-import com.example.study.common.code.PayErrorCode
+import com.example.study.common.exception.ApiException
 import com.example.study.domain.item.service.ItemService
 import com.example.study.domain.member.entity.Gender
 import com.example.study.domain.member.entity.MemberEntity
 import com.example.study.domain.member.entity.MemberStatus
 import com.example.study.domain.order.entity.OrderEntity
 import com.example.study.domain.order.entity.OrderStatus
-import com.example.study.domain.order.repository.OrderHistoryRepository
-import com.example.study.domain.order.repository.OrderRepository
 import com.example.study.domain.order.service.OrderService
 import com.example.study.domain.payment.api.PaymentRequest
 import com.example.study.domain.payment.api.Payments
@@ -32,15 +28,12 @@ class PaymentServiceTest {
     private val orderService: OrderService = mockk()
     private val itemService: ItemService = mockk()
     private val paymentRepository: PaymentRepository = mockk()
-    private val orderRepository: OrderRepository = mockk()
-    private val orderHistoryRepository: OrderHistoryRepository = mockk()
     private val distributedLockManager: DistributedLockManager = mockk()
     private val cafePaymentRequestClient: CafePaymentRequestClient = mockk()
     private val paymentService: PaymentService = PaymentService(
         orderService = orderService,
         itemService = itemService,
         paymentRepository = paymentRepository,
-        orderHistoryRepository = orderHistoryRepository,
         distributedLockManager = distributedLockManager,
         cafePaymentRequestClient = cafePaymentRequestClient
     )

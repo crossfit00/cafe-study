@@ -14,6 +14,7 @@ import com.example.study.domain.order.api.OrderCreateRequest
 import com.example.study.domain.order.api.OrderItemRequest
 import com.example.study.domain.order.entity.OrderEntity
 import com.example.study.domain.order.entity.OrderStatus
+import com.example.study.domain.order.repository.OrderHistoryRepository
 import com.example.study.domain.order.repository.OrderRepository
 import com.example.study.domain.payment.repository.PaymentHistoryRepository
 import com.example.study.domain.payment.repository.PaymentRepository
@@ -36,6 +37,7 @@ class OrderServiceTest {
     private val orderRepository: OrderRepository = mockk()
     private val paymentRepository: PaymentRepository = mockk()
     private val itemRepository: ItemRepository = mockk()
+    private val orderHistoryRepository: OrderHistoryRepository = mockk()
     private val paymentHistoryRepository: PaymentHistoryRepository = mockk()
     private val distributedLockManager: DistributedLockManager = mockk()
     private val cafePaymentRequestClient: PaymentClient = mockk()
@@ -48,7 +50,8 @@ class OrderServiceTest {
         itemRepository = itemRepository,
         paymentHistoryRepository = paymentHistoryRepository,
         distributedLockManager = distributedLockManager,
-        cafePaymentRequestClient = cafePaymentRequestClient
+        cafePaymentRequestClient = cafePaymentRequestClient,
+        orderHistoryRepository = orderHistoryRepository
     )
 
     @Nested
