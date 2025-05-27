@@ -48,6 +48,12 @@ java -jar cafe-study-0.0.1-SNAPSHOT.jar
 
 <br>
 
+### `Spring AOP 통한 인증/인가 중복 로직 처리`
+
+- 대부분의 GET이 아닌 API 들은 인증/인가가 필요한데, 중복되는 인증/인가 로직을 처리하기 위해 Spring AOP를 사용해서 처리 ([Link](https://github.com/crossfit00/cafe-study/blob/master/src/main/kotlin/com/example/study/infra/aop/AuthAspect.kt))
+
+<br>
+
 ### `주문/결제`
 
 - 주문/결제시에는 동시성 처리가 중요하여 Redis 분산락을 적용
