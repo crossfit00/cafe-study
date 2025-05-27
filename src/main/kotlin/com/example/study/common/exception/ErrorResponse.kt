@@ -20,11 +20,6 @@ class ErrorResponse(
         return errorCode.code
     }
 
-//    @JsonProperty("typeMessage")
-//    fun getTypeMessage(): String {
-//        return errorCode.name
-//    }
-
     @JsonProperty("detailMessage")
     fun getDetailMessage(): String? {
         return StringUtils.defaultIfEmpty(detailMessage, errorCode.defaultMessage)
