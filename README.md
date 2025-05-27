@@ -20,7 +20,7 @@
   - [회원 탈퇴](https://github.com/crossfit00/cafe-study/blob/master/docs/%ED%9A%8C%EC%9B%90%ED%83%88%ED%87%B4.md)
 - Order
   - [주문 생성](https://github.com/crossfit00/cafe-study/blob/master/docs/%EC%A3%BC%EB%AC%B8%20%EC%83%9D%EC%84%B1.md)
-  - [주문 취소]()
+  - [주문 취소](https://github.com/crossfit00/cafe-study/blob/master/docs/%EC%A3%BC%EB%AC%B8%20%EC%B7%A8%EC%86%8C.md)
 - Payment
   - [결제 생성]()
 
